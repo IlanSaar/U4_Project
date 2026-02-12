@@ -6,6 +6,7 @@ public class Hand {
         cards = text.split(",");
     }
 
+
     public int getHandStrength() {
         String type = getHandType();
 
@@ -19,6 +20,7 @@ public class Hand {
     }
 
     public String getHandType() {
+
         String[] labels = new String[5];
         int[] counts = new int[5];
         int size = 0;
@@ -58,6 +60,71 @@ public class Hand {
         return "High Card";
     }
 
+    public int getWildHandStrength() {
+
+        String[] labels = new String[5];
+        int[] counts = new int[5];
+        int size = 0;
+        int jackCount = 0;
+
+        for (int i = 0; i < 5; i++) {
+
+            if (cards[i].equals("Jack")) {
+                jackCount++;
+            } else {
+
+                boolean found = false;
+
+                for (int j = 0; j < size; j++) {
+                    if (labels[j].equals(cards[i])) {
+                        counts[j]++;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    labels[size] = cards[i];
+                    counts[size] = 1;
+                    size++;
+                }
+            }
+        }
+
+        // All Jacks
+        if (jackCount == 5) return 6;
+
+        // Find largest and second largest group
+        int max = 0;
+        int second = 0;
+
+        for (int i = 0; i < size; i++) {
+            if (counts[i] > max) {
+                second = max;
+                max = counts[i];
+            } else if (counts[i] > second) {
+                second = counts[i];
+            }
+        }
+
+        max += jackCount;
+
+        if (max == 5) return 6; // Five of a Kind
+        if (max == 4) return 5; // Four of a Kind
+
+        if (max == 3) {
+            if (second == 2) return 4; // Full House
+            return 3; // Three of a Kind
+        }
+
+        if (max == 2) {
+            if (second == 2) return 2; // Two Pair
+            return 1; // One Pair
+        }
+
+        return 0; // High Card
+    }
+
     public boolean isStrongerThan(Hand other) {
 
         if (this.getHandStrength() != other.getHandStrength()) {
@@ -67,6 +134,24 @@ public class Hand {
         for (int i = 0; i < 5; i++) {
             int a = cardValue(cards[i]);
             int b = cardValue(other.cards[i]);
+
+            if (a != b) {
+                return a > b;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isStrongerThanWild(Hand other) {
+
+        if (this.getWildHandStrength() != other.getWildHandStrength()) {
+            return this.getWildHandStrength() > other.getWildHandStrength();
+        }
+
+        for (int i = 0; i < 5; i++) {
+            int a = cardValueWild(cards[i]);
+            int b = cardValueWild(other.cards[i]);
 
             if (a != b) {
                 return a > b;
@@ -89,6 +174,22 @@ public class Hand {
         if (card.equals("5")) return 3;
         if (card.equals("4")) return 2;
         if (card.equals("3")) return 1;
+        return 0; // 2
+    }
+
+    private int cardValueWild(String card) {
+        if (card.equals("Ace")) return 12;
+        if (card.equals("King")) return 11;
+        if (card.equals("Queen")) return 10;
+        if (card.equals("10")) return 9;
+        if (card.equals("9")) return 8;
+        if (card.equals("8")) return 7;
+        if (card.equals("7")) return 6;
+        if (card.equals("6")) return 5;
+        if (card.equals("5")) return 4;
+        if (card.equals("4")) return 3;
+        if (card.equals("3")) return 2;
+        if (card.equals("2")) return 1;
         return 0;
     }
 }
